@@ -5,7 +5,7 @@
   "label": { "en": ["PDF test"] },
   "items": [
     {
-      "id": "http://localhost:8080/canvas/1",
+      "id": "http://localhost:8080/media/test.pdf",
       "type": "Canvas",
       "label": { "en": ["test.pdf"] },
       "items": [
