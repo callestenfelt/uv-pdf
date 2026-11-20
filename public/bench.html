@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>pdf.js bench</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script></head>
+<body><pre id="out">running…</pre>
+<script>
+// Usage: bench.html?url=/media/test.pdf  -> results in window.RESULT
+const url = new URLSearchParams(location.search).get("url") || "/media/test.pdf";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const log = [];
+const ms = (t) => Math.round(performance.now() - t);
+async function renderPage(doc, n, scale) {
+  const t = performance.now();
+  const page = await doc.getPage(n);
+  const vp = page.getViewport({ scale });
+  const c = document.createElement("canvas");
+  c.width = vp.width; c.height = vp.height;
+  await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+  const r = { page: n, scale, px: `${c.width}x${c.height}`, ms: ms(t) };
+  page.cleanup();
+  return r;
+}
+(async () => {
+  let t = performance.now();
+  const doc = await pdfjsLib.getDocument({ url }).promise;
+  log.push({ step: "getDocument (UV default: full download)", ms: ms(t) });
+  const p1 = await doc.getPage(1);
+  const v = p1.getViewport({ scale: 1 });
+  log.push({ step: "page1 size at scale 1 (pt)", w: v.width, h: v.height, pages: doc.numPages });
+  const ops = await p1.getOperatorList();
+  const imgOps = ops.fnArray.filter(f => f === pdfjsLib.OPS.paintImageXObject || f === pdfjsLib.OPS.paintJpegXObject).length;
+  log.push({ step: "page1 image ops", imgOps });
+  // cold first render, then repeat renders (what a page turn / zoom costs in UV)
+  for (const scale of [0.5, 1, 1.5, 2, 3]) log.push(await renderPage(doc, 1, scale));
+  for (let n = 1; n <= doc.numPages; n++) log.push(await renderPage(doc, n, 1));
+  window.RESULT = log;
+  document.getElementById("out").textContent = JSON.stringify(log, null, 1);
+})().catch(e => { window.RESULT = String(e); document.getElementById("out").textContent = e; });
+</script></body></html>
