@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UV PDF test</title>
+  <link rel="stylesheet" href="uv/uv.css" />
+  <script src="uv/umd/UV.js"></script>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    #uv { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="uv" class="uv"></div>
+  <script>
+    // ?pdfjs=1 -> pdf.js canvas renderer, default -> browser-native (PDFObject)
+    // Manifest defaults to /manifest.json, override with #?manifest=...
+    const usePdfJs = new URLSearchParams(location.search).get("pdfjs") === "1";
+    if (!location.hash.includes("manifest=")) {
+      location.hash = "?manifest=" + location.origin + "/manifest.json";
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlAdapter = new UV.IIIFURLAdapter();
+      const data = urlAdapter.getInitialData({ embedded: false });
+      const uv = UV.init("uv", data);
+      urlAdapter.bindTo(uv);
+      uv.on("configure", ({ config, cb }) => {
+        cb(new Promise((resolve) => {
+          resolve({ modules: { pdfCenterPanel: { options: { usePdfJs } } } });
+        }));
+      });
+    });
+  </script>
+</body>
+</html>

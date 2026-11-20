@@ -1,0 +1,32 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "http://localhost:8080/manifest.json",
+  "type": "Manifest",
+  "label": { "en": ["PDF test"] },
+  "items": [
+    {
+      "id": "http://localhost:8080/canvas/1",
+      "type": "Canvas",
+      "label": { "en": ["test.pdf"] },
+      "items": [
+        {
+          "id": "http://localhost:8080/canvas/1/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "http://localhost:8080/canvas/1/page/anno",
+              "type": "Annotation",
+              "motivation": "painting",
+              "target": "http://localhost:8080/canvas/1",
+              "body": {
+                "id": "http://localhost:8080/media/test.pdf",
+                "type": "Text",
+                "format": "application/pdf"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

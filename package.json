@@ -1,0 +1,16 @@
+{
+  "name": "uv-pdf",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "sync-uv": "node scripts/sync-uv.mjs",
+    "postinstall": "node scripts/sync-uv.mjs",
+    "start": "serve public -l 8080"
+  },
+  "dependencies": {
+    "universalviewer": "4.4.4"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
