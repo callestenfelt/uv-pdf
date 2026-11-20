@@ -22,10 +22,18 @@
     if (params.get("pdfjs") === "new") {
       window.PDFJS_ESM_BASE = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${params.get("v") || "6.5.438"}/build/`;
     }
-    if (!location.hash.includes("manifest=")) {
-      location.hash = "?manifest=" + location.origin + "/manifest.json";
-    }
-    document.addEventListener("DOMContentLoaded", () => {
+    // manifest.json is written for http://localhost:8080; rewrite it to the current origin
+    // so the same page works locally and when deployed.
+    const manifestReady = location.hash.includes("manifest=")
+      ? Promise.resolve()
+      : fetch("manifest.json")
+          .then((r) => r.text())
+          .then((t) => {
+            const blob = new Blob([t.replaceAll("http://localhost:8080", location.origin)], { type: "application/json" });
+            location.hash = "?manifest=" + URL.createObjectURL(blob);
+          });
+    document.addEventListener("DOMContentLoaded", async () => {
+      await manifestReady;
       const urlAdapter = new UV.IIIFURLAdapter();
       const data = urlAdapter.getInitialData({ embedded: false });
       const uv = UV.init("uv", data);
