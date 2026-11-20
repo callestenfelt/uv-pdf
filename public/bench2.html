@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>pdf.js bench (ESM)</title></head>
+<body><pre id="out">running…</pre>
+<script type="module">
+// bench2.html?v=6.5.438  (any pdfjs-dist >= 4 with build/pdf.min.mjs)
+// automation tabs throttle rAF to ~1Hz; shim it so timings are real (?raf=1 keeps the real one)
+if (!new URLSearchParams(location.search).get("raf")) window.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now()), 0);
+const q = new URLSearchParams(location.search);
+const v = q.get("v") || "6.5.438", url = q.get("url") || "/media/test.pdf";
+const base = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${v}/build/`;
+const pdfjsLib = await import(base + "pdf.min.mjs");
+pdfjsLib.GlobalWorkerOptions.workerSrc = base + "pdf.worker.min.mjs";
+const log = [{ version: pdfjsLib.version }];
+const ms = (t) => Math.round(performance.now() - t);
+async function renderPage(doc, n, scale) {
+  const t = performance.now();
+  const page = await doc.getPage(n);
+  const vp = page.getViewport({ scale });
+  const c = document.createElement("canvas");
+  c.width = vp.width; c.height = vp.height;
+  await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+  page.cleanup();
+  return { page: n, scale, px: `${c.width}x${c.height}`, ms: ms(t) };
+}
+try {
+  const t = performance.now();
+  const doc = await pdfjsLib.getDocument({ url }).promise;
+  log.push({ step: "getDocument", ms: ms(t) });
+  for (const scale of [0.5, 1, 1.5, 2, 3]) log.push(await renderPage(doc, 1, scale));
+  for (let n = 1; n <= doc.numPages; n++) log.push(await renderPage(doc, n, 1));
+} catch (e) { log.push(String(e)); }
+window.RESULT = log;
+document.getElementById("out").textContent = JSON.stringify(log, null, 1);
+</script></body></html>
