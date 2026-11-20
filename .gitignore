@@ -2,3 +2,4 @@ public/media/*.pdf
 node_modules/
 public/uv/
 
+serve.log
