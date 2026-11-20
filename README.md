@@ -8,4 +8,5 @@ Universal Viewer 4.4.4 PDF viewer test bed.
 
 - `/` : browser-native renderer (PDFObject)
 - `/?pdfjs=1` : pdf.js canvas renderer (`modules.pdfCenterPanel.options.usePdfJs`)
+- `/?pdfjs=new` : same, but with newer pdf.js (default 6.5.438, override with `&v=`). UV's pdf.js loader is patched by `scripts/sync-uv.mjs`
 - Manifest: `public/manifest.json` (IIIF v3, one Canvas with an `application/pdf` body)

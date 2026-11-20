@@ -16,7 +16,12 @@
   <script>
     // ?pdfjs=1 -> pdf.js canvas renderer, default -> browser-native (PDFObject)
     // Manifest defaults to /manifest.json, override with #?manifest=...
-    const usePdfJs = new URLSearchParams(location.search).get("pdfjs") === "1";
+    // ?pdfjs=new -> pdf.js canvas renderer using newer pdf.js (version in ?v=, default below)
+    const params = new URLSearchParams(location.search);
+    const usePdfJs = params.get("pdfjs") === "1" || params.get("pdfjs") === "new";
+    if (params.get("pdfjs") === "new") {
+      window.PDFJS_ESM_BASE = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${params.get("v") || "6.5.438"}/build/`;
+    }
     if (!location.hash.includes("manifest=")) {
       location.hash = "?manifest=" + location.origin + "/manifest.json";
     }
